@@ -1,0 +1,156 @@
+Program SuperSmNumbers;
+{
+ A composite number is called a Smith number
+ if the sum of its digits is equal to the sum of the digits of all
+ the numbers formed by decomposing the original number into prime factors.
+ Smith's number is called a Smith super-number if the sum of its digits
+ is Smith's number. Develop an algorithm and a program for finding
+ Smith's super-number with the number N, which is a complete square.
+ (A number is called a full square if the root of the square is a prime number).
+}
+
+// Library for IntToStr()
+Uses
+  System.SysUtils;
+
+// Initialize variables
+Var
+  NewSum, Newi, SumForSum, SmAmount, Index, DigitSum, Sum, Number, i, j: longword;
+  Err, SmAmountNumber: integer;
+  Carry: real;
+  Flag, StopFlag: boolean;
+  StrNumber, StrSum, StringI: string;
+{
+ NewSum - the sum of the sum of the digits of the prime divisors of the number
+ Newi - selection of prime numbers
+ SumForSum - the sum of digits in the sum of all prime divisors of the number in question
+ SmAmount - counter of the required numbers under consideration
+ Index - index
+ DigitSum - the sum of digits in the number under consideration
+ Sum - the sum of the digits of the divisors of the number in question
+ Number - considered number
+ i - root of the number under consideration
+ j - overdoing each digit
+ Carry - part number when divided by prime numbers
+ Flag - flag to fix the value
+ StopFlag - flag to stop the cycle
+ StrNumber - considered number in the string type
+ StrSum - the sum of digits of prime divisors for the number in question in the string type
+ StringI - simple divisor for the number in question in the string type
+ Err - the first place of the error when entering a number
+ SmAmountNumber - the number of the number to be displayed on the console
+}
+
+Begin
+  SmAmount := 1;
+  i := 1;
+
+  // Check for correct input
+  Repeat
+    StopFlag := True;
+    Write('Enter the number of the desired Smith’s supernumber (1-49): ');
+    Readln(StrNumber);
+    Val(StrNumber, SmAmountNumber, Err);
+    If (SmAmountNumber < 1) or (SmAmountNumber > 49) or (Err > 0) then
+    Begin
+      Writeln('You have to enter a number from 1 to 49. Error code ', Err);
+      StopFlag := False;
+    End;
+  Until StopFlag;
+
+  StopFlag := False;
+
+  // List all numbers for finding the Smith number
+  Repeat
+    Flag:= False;
+    Inc(i);
+
+    If Sqrt(4294967295) < i then
+    Begin
+      StopFlag := True;
+      continue;
+    End;
+
+    // Simple number search
+    // Returns i as a simple number
+    For j := 2 to i-1 do
+      If not Flag and (i mod j = 0) then
+        Flag := True;
+
+    Number := Sqr(i);
+    Carry := Number;
+    DigitSum := 0;
+    Sum := 0;
+
+    // Is i suitable as a divisor
+    // Returns Carry as a result
+    If not Flag then
+    Begin
+
+      StrNumber := IntToStr(Number);
+      For Index := 1 to length(StrNumber) do
+        DigitSum := DigitSum + Ord(StrNumber[Index]) - 48;
+      StringI := IntToStr(i);
+
+      While Carry > 1 do
+      Begin
+        Carry := Carry / i;
+        For Index := 1 to length(StringI) do
+          Sum := Sum + Ord(StringI[Index]) - 48;
+      End;
+
+      // If the sum of digits in the number = the sum of
+      // the digits of the prime divisors of the number
+      If DigitSum = Sum then
+      Begin
+        SumForSum := 0;
+        Newi := 2;
+        Carry := Sum;
+
+        StrSum := IntToStr(Sum);
+        NewSum := 0;
+        For Index := 1 to length(StrSum) do
+          NewSum := NewSum + Ord(StrSum[Index]) - 48;
+
+        // Finding the sum of the digits of the prime divisors of
+        // the sum obtained as a result of the sum of the digits of
+        // prime divisors of the number under consideration
+        While (Carry > 1) and (Newi < Sum) do
+        Begin
+
+          For j := 2 to Newi-1 do
+            If not Flag and (Newi mod j = 0) then
+              Flag := True;
+
+          // Is Newi suitable as a divisor
+          // Returns Carry and SumForSum
+          // SumForSum as the sum of the divisor digits
+          If not Flag and (Frac(Carry / Newi) = 0) then
+          Begin
+            Carry := Carry / Newi;
+            StringI := IntToStr(Newi);
+            For Index := 1 to length(StringI) do
+              SumForSum := SumForSum + Ord(StringI[Index]) - 48;
+          End
+          Else
+            Inc(Newi);
+
+          Flag := False;
+        End;
+
+        // Output to the console
+        If SumForSum = NewSum then
+        Begin
+          If SmAmount = SmAmountNumber then
+          Begin
+            Writeln('The appropriate Smith''s supernumber №', SmAmount,': ', Number);
+            StopFlag := True;
+          End;
+          Inc(SmAmount);
+        End;
+      End;
+    End;
+  Until StopFlag;
+
+  Readln;
+End.
